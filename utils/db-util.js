@@ -10,8 +10,8 @@ const pool = mysql.createPool({
 });
 
 let query = (sql, values) => {
-    console.log('---->');
-    console.log(` sql:   ${sql}  \n values:   ${values}`);
+    // console.log('---->');
+    // console.log(` sql:   ${sql}  \n values:   ${values}`);
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {

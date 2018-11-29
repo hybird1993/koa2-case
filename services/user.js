@@ -3,6 +3,11 @@ const ApiError = require('../error/ApiError');
 const ApiErrorNames = require('../error/ApiErrorNames');
 
 const user = {
+    /**
+     * 获取用户列表
+     * @param ctx
+     * @returns {Promise<void>}
+     */
     async getUsersList(ctx) {
         const params = ctx.request.body;
         if(!params.pageSize || !params.pageNum) {
@@ -98,6 +103,16 @@ const user = {
             throw new ApiError(ApiErrorNames.USER_NAME_EXIST);
         }
     },
+
+    async getUserInfo(ctx) {
+        const user = ctx.session;
+        const data = {
+            name: user.name,
+            nickname: user.nickname,
+            icon: user.icon,
+            email: user.email};
+        ctx.body = data;
+    }
 };
 
 module.exports = user;
