@@ -11,13 +11,13 @@ const user = {
      */
     async getUsersList(ctx) {
         const params = ctx.request.body;
-        if(!params.pageSize || !params.pageNum) {
+        if (!params.pageSize || !params.pageNum) {
             throw new ApiError(ApiErrorNames.PARAMETER_ERROR)
         }
         const num = await userDao.getTotalUsersNum();
         let usersList = await userDao.getUsersList(params);
         const _usersList = usersList.map(item => {
-            const {password , ..._item} = item;
+            const {password, ..._item} = item;
             return _item;
         });
         ctx.body = {
@@ -44,7 +44,7 @@ const user = {
             } else {
                 const user = result[0];
                 ctx.session = user;
-                const {password, ..._data} =  user;
+                const {password, ..._data} = user;
                 ctx.body = _data;
             }
         }
@@ -103,7 +103,7 @@ const user = {
      * @returns {Promise<void>}
      */
     async getUserInfo(ctx) {
-        const {password, ..._data} =  ctx.session;
+        const {password, ..._data} = ctx.session;
         ctx.body = _data;
     },
 
@@ -114,10 +114,13 @@ const user = {
      */
     async deleteUsers(ctx) {
         const ids = ctx.request.body.ids;
-        if(!Types.isArray(ids) && !Types.isString(ids) && !Types.isNumber(ids)) {
+        if (!Types.isArray(ids) && !Types.isString(ids) && !Types.isNumber(ids)) {
             throw new ApiError(ApiErrorNames.PARAMETER_ERROR);
         }
-        if(ids === 1 || ids === '1' || ids.indexOf(1) > -1 || ids.indexOf('1') > -1) {
+        const bol = Types.isArray(ids) ? ids === 1 :
+            Types.isString(ids) ? ids === '1' :
+                Types.isArray(ids) ? (ids.indexOf('1') || ids.indexOf(1) > -1) > -1 : false;
+        if (bol) {
             throw new ApiError(ApiErrorNames.ADMIN_NOT_DELETE);
         }
         const result = await userDao.deleteUsers(ids);
