@@ -1,6 +1,7 @@
 const userDao = require('../dao/user');
 const ApiError = require('../error/ApiError');
 const ApiErrorNames = require('../error/ApiErrorNames');
+const Types = require('../utils/type');
 
 const user = {
     /**
@@ -14,14 +15,11 @@ const user = {
             throw new ApiError(ApiErrorNames.PARAMETER_ERROR)
         }
         const num = await userDao.getTotalUsersNum();
-        console.log(num)
         let usersList = await userDao.getUsersList(params);
-        console.log(usersList)
         const _usersList = usersList.map(item => {
             const {password , ..._item} = item;
             return _item;
         });
-        console.log(_usersList)
         ctx.body = {
             data: _usersList,
             totalCount: num,
@@ -46,13 +44,8 @@ const user = {
             } else {
                 const user = result[0];
                 ctx.session = user;
-                const data = {
-                    name: user.name,
-                    nickname: user.nickname,
-                    icon: user.icon,
-                    email: user.email};
-                console.log(data, '--->data')
-                ctx.body = data
+                const {password, ..._data} =  user;
+                ctx.body = _data;
             }
         }
     },
@@ -78,6 +71,7 @@ const user = {
             ctx.body = true;
         }
     },
+
     /**
      * 通过用户名查找用户
      * @param name
@@ -87,7 +81,6 @@ const user = {
         const result = await userDao.findUserByName(name);
         return result;
     },
-
 
     /**
      * 检验用户名是否存在
@@ -104,14 +97,57 @@ const user = {
         }
     },
 
+    /**
+     *  获取用户信息
+     * @param ctx
+     * @returns {Promise<void>}
+     */
     async getUserInfo(ctx) {
-        const user = ctx.session;
+        const {password, ..._data} =  ctx.session;
+        ctx.body = _data;
+    },
+
+    /**
+     * 删除用户
+     * @param ctx
+     * @returns {Promise<void>}
+     */
+    async deleteUsers(ctx) {
+        const ids = ctx.request.body.ids;
+        if(!Types.isArray(ids) && !Types.isString(ids) && !Types.isNumber(ids)) {
+            throw new ApiError(ApiErrorNames.PARAMETER_ERROR);
+        }
+        if(ids === 1 || ids === '1' || ids.indexOf(1) > -1 || ids.indexOf('1') > -1) {
+            throw new ApiError(ApiErrorNames.ADMIN_NOT_DELETE);
+        }
+        const result = await userDao.deleteUsers(ids);
         const data = {
-            name: user.name,
-            nickname: user.nickname,
-            icon: user.icon,
-            email: user.email};
+            success: result.affectedRows,
+            total: Types.isArray(ids) ? ids.length : 1
+        };
         ctx.body = data;
+    },
+
+    async modifyPassword(ctx) {
+        const oldPwd = ctx.request.body.oldPwd;
+        const newPwd = ctx.request.body.newPwd;
+        const name = ctx.session.name;
+        if (!oldPwd || !newPwd) {
+            throw new ApiError(ApiErrorNames.USER_NAME_OR_PASSWORD_ERROR);
+        } else {
+            const result = await userDao.getUserByName(name);
+            if (result.length === 0 || oldPwd !== result[0].password) {
+                throw new ApiError(ApiErrorNames.USER_NAME_OR_PASSWORD_ERROR);
+            } else {
+                const result = await userDao.modifyPassword(name, newPwd);
+                if (result.affectedRows === 1) {
+                    ctx.body = true;
+                } else {
+                    throw new ApiError(ApiErrorNames.UNKNOWN_ERROR);
+                }
+
+            }
+        }
     }
 };
 
