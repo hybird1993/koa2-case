@@ -119,7 +119,7 @@ const user = {
         }
         const bol = Types.isArray(ids) ? ids === 1 :
             Types.isString(ids) ? ids === '1' :
-                Types.isArray(ids) ? (ids.indexOf('1') || ids.indexOf(1) > -1) > -1 : false;
+                Types.isArray(ids) ? (ids.indexOf('1') > -1 || ids.indexOf(1) > -1) : false;
         if (bol) {
             throw new ApiError(ApiErrorNames.ADMIN_NOT_DELETE);
         }
