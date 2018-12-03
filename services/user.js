@@ -4,6 +4,11 @@ const ApiErrorNames = require('../error/ApiErrorNames');
 const Types = require('../utils/type');
 
 const user = {
+    async default(ctx) {
+        console.log(11)
+        throw new ApiError(ApiErrorNames.BAD_REQUEST);
+    },
+
     /**
      * 获取用户列表
      * @param ctx
@@ -44,7 +49,7 @@ const user = {
             } else {
                 const user = result[0];
                 ctx.session = user;
-                const {password, ..._data} = user;
+                const {id, password, ..._data} = user;
                 ctx.body = _data;
             }
         }
@@ -103,7 +108,7 @@ const user = {
      * @returns {Promise<void>}
      */
     async getUserInfo(ctx) {
-        const {password, ..._data} = ctx.session;
+        const {id, password, ..._data} = ctx.session;
         ctx.body = _data;
     },
 
@@ -121,7 +126,7 @@ const user = {
             Types.isString(ids) ? ids === '1' :
                 Types.isArray(ids) ? (ids.indexOf('1') > -1 || ids.indexOf(1) > -1) : false;
         if (bol) {
-            throw new ApiError(ApiErrorNames.ADMIN_NOT_DELETE);
+            throw new ApiError(ApiErrorNames.ADMIN_CAN_NOT_DELETE);
         }
         const result = await userDao.deleteUsers(ids);
         const data = {
@@ -131,6 +136,11 @@ const user = {
         ctx.body = data;
     },
 
+    /**
+     * 修改密码
+     * @param ctx
+     * @returns {Promise<void>}
+     */
     async modifyPassword(ctx) {
         const oldPwd = ctx.request.body.oldPwd;
         const newPwd = ctx.request.body.newPwd;
@@ -151,7 +161,34 @@ const user = {
 
             }
         }
-    }
+    },
+
+    /**
+     * 重置密码
+     * @param ctx
+     * @returns {Promise<void>}
+     */
+    async resetPassword(ctx) {
+        const password = ctx.request.body.password;
+        const id = ctx.request.body.id;
+        const name = ctx.session.name;
+        if (name.toLowerCase() !== 'admin') {
+            throw new ApiError(ApiErrorNames.INSUFFICIENT_PRIVILEGE);
+        } else {
+            const result = await userDao.getUserByKey(id);
+            if (result.length === 0) {
+                throw new ApiError(ApiErrorNames.USER_NAME_OR_PASSWORD_ERROR);
+            } else {
+                const result = await userDao.resetPassword(id, password);
+                if (result.affectedRows === 1) {
+                    ctx.body = true;
+                } else {
+                    throw new ApiError(ApiErrorNames.UNKNOWN_ERROR);
+                }
+
+            }
+        }
+    },
 };
 
 module.exports = user;

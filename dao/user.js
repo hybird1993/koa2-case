@@ -14,6 +14,10 @@ const user = {
         const result = await dbUtils.query("SELECT * FROM ?? WHERE name = ?", ['user_info', name]);
         return result;
     },
+    async getUserByKey(value, key = 'id') {
+        const result = await Common.findDataByKey('user_info', value, key);
+        return result;
+    },
     async register(params) {
         const result = await Common.insert('user_info', params);
         return result;
@@ -23,15 +27,19 @@ const user = {
         return result;
     },
     async getTotalUsersNum() {
-        const result =await Common.getTotalNum('user_info');
-        return result;
+        const result = await dbUtils.baseQuery(`SELECT COUNT(*) FROM user_info WHERE name != "admin"`);
+        return result[0]['COUNT(*)'];
     },
     async deleteUsers(ids) {
         const result = await Common.deleteItems('user_info', 'id', ids);
         return result;
     },
-    async modifyPassword(name, newPwd) {
-        const result = await dbUtils.query("UPDATE ?? SET password = ? WHERE name = ?", ['user_info', newPwd, name]);
+    async modifyPassword(name, password) {
+        const result = await dbUtils.query("UPDATE ?? SET password = ? WHERE name = ?", ['user_info', password, name]);
+        return result;
+    },
+    async resetPassword(id, password) {
+        const result = await dbUtils.query("UPDATE ?? SET password = ? WHERE id = ?", ['user_info', password, id]);
         return result;
     }
 };

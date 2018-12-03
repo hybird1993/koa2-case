@@ -15,9 +15,9 @@ const common = {
         const startIndex = (pageNum - 1) * pageSize;
         let result;
         if(sortWay && sortItem) {
-            result = await dbUtils.query("SELECT * FROM ?? ORDER BY ? ? LIMIT ?, ?", [table_name, sortItem, sortWay, startIndex, pageSize]);
+            result = await dbUtils.query(`SELECT * FROM ?? WHERE name != "admin" ORDER BY ? ? LIMIT ?, ?`, [table_name, sortItem, sortWay, startIndex, pageSize]);
         } else {
-            result = await dbUtils.query("SELECT * FROM ?? LIMIT ?, ?", [table_name, startIndex, pageSize]);
+            result = await dbUtils.query(`SELECT * FROM ?? WHERE name != "admin" LIMIT ?, ?`, [table_name, startIndex, pageSize]);
         }
         return result;
     },
@@ -33,7 +33,7 @@ const common = {
         return result;
     },
 
-    async findDataByKey(table_name, value, key = 'id') {
+    async findDataByKey(table_name, value, key) {
         let result;
         result = await dbUtils.query(`SELECT * FROM ?? WHERE ${key} = ?`, [table_name, value]);
         return result;

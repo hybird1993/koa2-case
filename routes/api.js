@@ -8,6 +8,9 @@ router.get('/user/checkUserName/:username', userService.checkUserName);
 router.get('/user/getUserInfo', userService.getUserInfo);
 router.post('/user/delete', userService.deleteUsers);
 router.post('/user/modifyPassword', userService.modifyPassword);
+router.post('/user/resetPassword', userService.resetPassword);
+router.post('**', userService.default);
+router.get('**', userService.default);
 
 
 module.exports = router;
