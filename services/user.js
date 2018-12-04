@@ -5,7 +5,6 @@ const Types = require('../utils/type');
 
 const user = {
     async default(ctx) {
-        console.log(11)
         throw new ApiError(ApiErrorNames.BAD_REQUEST);
     },
 
@@ -108,8 +107,42 @@ const user = {
      * @returns {Promise<void>}
      */
     async getUserInfo(ctx) {
-        const {id, password, ..._data} = ctx.session;
+        // console.log(ctx.params);
+        let user;
+        if (ctx.params.id) {
+            const result = await userDao.getUserByKey(ctx.params.id);
+            if(result.length === 0 ){
+                throw new ApiError()
+            }else {
+                user = result[0];
+            }
+        } else {
+            user = ctx.session;
+        }
+        const {id, password, ..._data} = user;
         ctx.body = _data;
+    },
+
+    /**
+     *  修改用户信息
+     * @param ctx
+     * @returns {Promise<void>}
+     */
+    async modifyUser(ctx) {
+        console.log(ctx.params);
+        // let user;
+        // if (ctx.params.id) {
+        //     const result = await userDao.getUserByKey(ctx.params.id);
+        //     if(result.length === 0 ){
+        //         throw new ApiError()
+        //     }else {
+        //         user = result[0];
+        //     }
+        // } else {
+        //     user = ctx.session;
+        // }
+        // const {id, password, ..._data} = user;
+        // ctx.body = _data;
     },
 
     /**

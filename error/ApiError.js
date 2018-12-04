@@ -8,6 +8,7 @@ class ApiError extends Error {
         this.code = error_info.code;
         this.msg = error_info.msg;
         this.desc = error_info.desc;
+        this.status = error_info.status;
     }
 }
 

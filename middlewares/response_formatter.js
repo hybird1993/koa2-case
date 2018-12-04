@@ -32,7 +32,9 @@ const url_filter = (pattern) => {
                 const lang = ctx.request.header.lang || 'zh';
                 const error = ApiErrorNames.getErrorInfo(ApiErrorNames.USER_SESSION_INVALID);
                 const msg = lang === 'zh' ? error.desc : error.msg;
-                ctx.status = 401;
+                if(error.status) {
+                    ctx.status = error.status;
+                }
                 ctx.body = {
                     code: error.code,
                     msg: msg
@@ -44,13 +46,16 @@ const url_filter = (pattern) => {
         } catch (error) {
             // 如果异常类型是API异常并且通过正则验证的url，将错误信息添加到响应体中返回。
             if (error instanceof ApiError && reg.test(ctx.originalUrl)) {
+                console.log(error)
                 const lang = ctx.request.header.lang || 'zh';
                 const msg = lang === 'zh' ? error.desc : error.msg;
-                ctx.status = 200;
+                if(error.status) {
+                    ctx.status = error.status;
+                }
                 ctx.body = {
                     code: error.code,
                     msg: msg
-                }
+                };
             }
             //继续抛，让外层中间件处理日志
             throw error;
