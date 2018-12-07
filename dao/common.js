@@ -44,6 +44,13 @@ const common = {
         result = await dbUtils.query(`INSERT INTO ?? SET ?`, [table_name, params]);
         return result;
     },
+
+    async update(table_name, params, queryStr) {
+        let _queryStr = queryStr ? `WHERE ${queryStr}` : '';
+        let result;
+        result = await dbUtils.query(`UPDATE ?? SET ? ${_queryStr}`, [table_name, params]);
+        return result;
+    },
 };
 
 module.exports = common;

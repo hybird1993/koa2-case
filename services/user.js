@@ -128,21 +128,21 @@ const user = {
      * @param ctx
      * @returns {Promise<void>}
      */
-    async modifyUser(ctx) {
-        console.log(ctx.params);
-        // let user;
-        // if (ctx.params.id) {
-        //     const result = await userDao.getUserByKey(ctx.params.id);
-        //     if(result.length === 0 ){
-        //         throw new ApiError()
-        //     }else {
-        //         user = result[0];
-        //     }
-        // } else {
-        //     user = ctx.session;
-        // }
-        // const {id, password, ..._data} = user;
-        // ctx.body = _data;
+
+     async modifyUser(ctx) {
+        const {id: _id, name, ...requestParams} = ctx.request.body;
+        let id;
+        if (_id) {
+           id = _id;
+        } else {
+           id = ctx.session.id
+        }
+        const result = await userDao.modifyUser(requestParams, `id = ${id}`);
+        if (result.affectedRows === 1) {
+            ctx.body = true;
+        } else {
+            throw new ApiError(ApiErrorNames.UNKNOWN_ERROR);
+        }
     },
 
     /**
